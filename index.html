@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>The Hyrule Bar</title>
+
+  <!-- PWA & Mobile App Install Meta Tags -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#020617" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hyrule Bar" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Myanmar:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Myanmar', sans-serif;
+      background-color: #0b111e;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mm-text {
+      line-height: 1.85;
+    }
+    .game-case {
+      aspect-ratio: 2 / 3;
+    }
+    .drawer-enter {
+      transform: translateY(100%);
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-24 selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- Top Tavern Header -->
+  <header class="sticky top-0 z-20 bg-slate-950/95 backdrop-blur-md border-b border-amber-500/20">
+    <div class="max-w-4xl mx-auto px-4 pt-3.5 pb-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-extrabold shadow-md shadow-amber-500/20 shrink-0">
+            ⚔️
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-lg font-extrabold tracking-tight text-amber-400 leading-none truncate">The Hyrule Bar</h1>
+            <p class="text-[11px] text-slate-400 mt-0.5 truncate">Nintendo Switch 2 Virtual Game Cards</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <span id="gameCount" class="sm:hidden text-xs bg-slate-800 text-amber-300 px-2.5 py-1 rounded-full font-semibold">
+            Loading...
+          </span>
+          <a href="https://www.facebook.com/thehyrulebar" target="_blank" rel="noopener noreferrer"
+            class="sm:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2]/25 border border-[#1877F2]/35 text-[#60a5fa] text-xs font-semibold transition active:scale-95">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
+            </svg>
+            <span>Page</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div id="headerSearchWrap" class="flex-1 sm:flex-initial">
+          <input id="searchInput" type="search" placeholder="Search games..."
+            class="w-full sm:w-56 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400" />
+        </div>
+        <a href="https://www.facebook.com/thehyrulebar" target="_blank" rel="noopener noreferrer"
+          class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2]/25 border border-[#1877F2]/35 text-[#60a5fa] text-xs font-semibold transition active:scale-95 shrink-0">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/>
+          </svg>
+          <span>FB Page</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 3-Tab Main Navigation -->
+    <nav class="max-w-4xl mx-auto px-4 pb-2.5">
+      <div class="grid grid-cols-3 gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
+        <button id="navTab-games" onclick="switchMainTab('games')"
+          class="py-2 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow">
+          <span>🎮</span><span>Games</span>
+        </button>
+        <button id="navTab-types" onclick="switchMainTab('types')"
+          class="py-2 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200">
+          <span>💳</span><span>How It Works</span>
+        </button>
+        <button id="navTab-guide" onclick="switchMainTab('guide')"
+          class="py-2 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200">
+          <span>📖</span><span>Install Guide</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- TAB 1: Main Game Case Shelf -->
+  <main id="view-games" class="max-w-4xl mx-auto px-4 pt-5">
+    <div class="flex items-center justify-between gap-2 mb-4">
+      <button id="availFilterBtn" onclick="toggleAvailableFilter()"
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition bg-slate-900 text-slate-300 border-slate-700 hover:border-emerald-500/50 shrink-0">
+        <span id="availDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span>ငှားလို့ရတာပဲပြပါ။</span>
+      </button>
+
+      <div class="flex items-center gap-2">
+        <span id="desktopGameCount" class="hidden sm:inline text-xs text-slate-400 font-semibold"></span>
+        <select id="sortSelect" onchange="applyFilters()"
+          class="px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-slate-300 border border-slate-700 focus:outline-none focus:border-amber-400">
+          <option value="default">Sort: Default</option>
+          <option value="score-desc">Score: High → Low</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="year-desc">Year: Newest First</option>
+          <option value="title-asc">Title: A → Z</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="shelfGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+  </main>
+
+  <!-- TAB 2: How Virtual Game Cards Work (Controlled by 'GameTypes' tab in Sheet) -->
+  <section id="view-types" class="hidden max-w-4xl mx-auto px-4 pt-6 space-y-6">
+    <h2 id="gameTypesHeading" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight mm-text">
+      NS ရဲ့ Virtual Game Card (VGC) ဆိုတာဘာလဲ?
+    </h2>
+
+    <!-- White Info Card(s) -->
+    <div id="gameTypesCards" class="grid grid-cols-1 gap-4 sm:gap-5"></div>
+
+    <!-- Checkmark Notes List Below -->
+    <div id="gameTypesNotes" class="space-y-3 pt-1"></div>
+
+    <div class="pt-2">
+      <button onclick="switchMainTab('guide')"
+        class="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/15">
+        📖 Installation Guide ကြည့်ရန် နှိပ်ပါ →
+      </button>
+    </div>
+
+    <!-- Messenger Contact Card -->
+    <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="text-center sm:text-left">
+        <p class="text-sm font-semibold text-slate-100">မေးမြန်းလိုသည်များရှိပါသလား?</p>
+        <p class="text-xs text-slate-400 mt-0.5 mm-text">ဂိမ်းငှားရမ်းရန်နှင့် အသေးစိတ်စုံစမ်းရန် Messenger မှ တိုက်ရိုက်ဆက်သွယ်နိုင်ပါသည်။</p>
+      </div>
+      <a href="https://m.me/thehyrulebar" target="_blank" rel="noopener noreferrer"
+        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#0084FF] hover:bg-[#0073e6] text-white text-xs font-semibold text-center whitespace-nowrap transition shadow-md shadow-blue-500/20">
+        📩 Messenger မှ ဆက်သွယ်မည်
+      </a>
+    </div>
+  </section>
+
+  <!-- TAB 3: Virtual Game Card Installation & Removal Guide -->
+  <section id="view-guide" class="hidden max-w-4xl mx-auto px-4 pt-6 space-y-5">
+    <div class="space-y-1">
+      <h2 class="text-xl sm:text-2xl font-extrabold text-white">📖 Virtual Game Card လမ်းညွှန်</h2>
+      <p class="text-xs sm:text-sm text-slate-400 mm-text">ဂိမ်းစတင်ချိတ်ဆက်နည်းနှင့် ငှားရမ်းမှုပြီးဆုံးချိန် ပြန်လည်ဖြုတ်သိမ်းနည်း အဆင့်ဆင့်</p>
+    </div>
+
+    <!-- Sub-Tab Toggle: Install vs Delete/Eject -->
+    <div class="grid grid-cols-2 gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800 max-w-md">
+      <button id="guideSubTab-install" type="button" onclick="switchGuideSubTab('install')"
+        class="py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow">
+        <span>📥</span><span>ငှားထားသော User ထည့်သွင်းနည်းနှင့် Virtual Game Card ထည့်သွင်းနည်း</span>
+      </button>
+      <button id="guideSubTab-delete" type="button" onclick="switchGuideSubTab('delete')"
+        class="py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200">
+        <span>🗑️</span><span>ငှားထားသော User ပြန်ဖြုတ်နည်း</span>
+      </button>
+    </div>
+
+    <!-- Vertically Arranged Step-by-Step Pictures & Texts -->
+    <div id="guideStepsContainer" class="space-y-4"></div>
+
+    <!-- Messenger Contact Card -->
+    <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="text-center sm:text-left">
+        <p class="text-sm font-semibold text-slate-100">ချိတ်ဆက်ရာတွင် / ပြန်ဖြုတ်ရာတွင် အခက်အခဲရှိပါသလား?</p>
+        <p class="text-xs text-slate-400 mt-0.5 mm-text">အကူအညီလိုအပ်ပါက Messenger မှတစ်ဆင့် အချိန်မရွေး မေးမြန်းနိုင်ပါသည်။</p>
+      </div>
+      <a href="https://m.me/thehyrulebar" target="_blank" rel="noopener noreferrer"
+        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#0084FF] hover:bg-[#0073e6] text-white text-xs font-semibold text-center whitespace-nowrap transition shadow-md shadow-blue-500/20">
+        📩 Messenger မှ ဆက်သွယ်မည်
+      </a>
+    </div>
+  </section>
+
+  <!-- Floating Tavern Chat Button -->
+  <button onclick="openChat()"
+    class="fixed bottom-5 right-5 z-20 bg-amber-500 hover:bg-amber-400 active:scale-95 transition text-slate-950 font-bold px-4 py-3 rounded-full shadow-lg shadow-amber-500/25 flex items-center gap-2 text-sm">
+    <span>💬</span>
+    <span>Tavern Chat</span>
+    <span id="chatBadge" class="bg-slate-950 text-amber-400 text-xs px-2 py-0.5 rounded-full">0</span>
+  </button>
+
+  <!-- Game Details Bottom Sheet Drawer -->
+  <div id="gameModal" onclick="closeGameModal(event)"
+    class="fixed inset-0 z-30 bg-black/75 backdrop-blur-xs hidden flex items-end sm:items-center justify-center">
+    <div id="gameDrawer" onclick="event.stopPropagation()"
+      class="bg-slate-900 border-t sm:border border-slate-700/80 w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[88vh] flex flex-col transition-transform duration-200 drawer-enter shadow-2xl">
+      <div class="w-full flex justify-center pt-3 pb-1 sm:hidden">
+        <div class="w-10 h-1.5 rounded-full bg-slate-700"></div>
+      </div>
+      <div id="gameDrawerBody" class="overflow-y-auto px-5 pb-6 pt-2 space-y-4"></div>
+      <div class="p-4 border-t border-slate-800 bg-slate-950/80 flex flex-col gap-2">
+        <button id="drawerRentBtn" type="button"
+          class="w-full py-2.5 px-4 rounded-xl bg-[#0084FF] hover:bg-[#0073e6] text-white font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-[0.99] shadow-lg shadow-blue-500/20">
+        </button>
+        <div class="flex gap-2">
+          <button id="askAboutGameBtn" type="button"
+            class="flex-1 py-2.5 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold text-sm hover:bg-amber-500/25">
+            💬 Comment on this game
+          </button>
+          <button onclick="hideGameModal()" type="button"
+            class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-semibold text-sm hover:bg-slate-700">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tavern Chat / Guestbook Drawer -->
+  <div id="chatModal" onclick="closeChatModal(event)"
+    class="fixed inset-0 z-40 bg-black/75 backdrop-blur-xs hidden flex items-end sm:items-center justify-center">
+    <div onclick="event.stopPropagation()"
+      class="bg-slate-900 border-t sm:border border-slate-700/80 w-full max-w-lg rounded-t-3xl sm:rounded-3xl h-[82vh] flex flex-col shadow-2xl">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <h2 class="font-bold text-base text-amber-400">🍺 The Hyrule Bar — Guestbook</h2>
+          <p class="text-xs text-slate-400">ပြောချင်တာ ပြောခဲ့မယ်</p>
+        </div>
+        <button onclick="hideChatModal()" class="text-slate-400 hover:text-white text-sm font-semibold px-3 py-1.5 bg-slate-800 rounded-lg">
+          Close
+        </button>
+      </div>
+      <div id="chatList" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+      <form id="chatForm" class="p-4 border-t border-slate-800 bg-slate-950/80 space-y-2.5">
+        <div class="flex gap-2">
+          <input id="chatName" type="text" placeholder="Your Nickname" required
+            class="w-1/2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-100 focus:outline-none focus:border-amber-400" />
+          <select id="chatGameTag"
+            class="w-1/2 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-amber-400">
+            <option value="General">General Chat</option>
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <input id="chatMessage" type="text" placeholder="Game တွေ အကြောင်း ရေးခဲ့ပါ။" required
+            class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
+          <button id="chatSubmitBtn" type="submit"
+            class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm shrink-0">
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzJr96keSYR_fwPiOoVcGgl_aGfw9Uy9oJhY2Qd78y0h1iY-zck0ef0VMuYCVJMGFoSuA/exec";
+    const FB_PAGE_URL = 'https://www.facebook.com/thehyrulebar';
+    const MESSENGER_URL = 'https://m.me/thehyrulebar';
+
+    const DEFAULT_GAME_TYPES = [
+      {
+        section: "header",
+        title: "NS ရဲ့ Virtual Game Card (VGC) ဆိုတာဘာလဲ?"
+      },
+      {
+        section: "card",
+        code: "VGC",
+        title: "Virtual Game Card",
+        content: "Cartridge အစစ်တစ်ချပ်လို မိမိစက်ထဲ တိုက်ရိုက် Load လုပ်ပြီး ကိုယ်ပိုင် User နဲ့ ဆော့ကစားပေးရပါမယ်။ (ကျွန်တော်ပေးသော Account User နဲ့ ဆော့လို့မရပါ။)\n\nကိုယ်ပိုင် User Account နဲ့ Wi-Fi ဖွင့်ပြီးဆော့လို့ရသလို ပိတ်ပြီး Offline လည်း အချိန်မရွေး ဆော့လို့ရပါတယ်။ (Online Multiplayer ပါဆော့လို့ရ)"
+      },
+      {
+        section: "note",
+        content: "တစ်ကြိမ်ငှားရမ်းလျှင် ၁၄ ရက် (2 Weeks) အသုံးပြုနိုင်ပြီး မိမိကိုယ်ပိုင် Save Data ဖြင့် စိတ်ကြိုက်ဆော့ကစားနိုင်ပါသည်။"
+      },
+      {
+        section: "note",
+        content: "Nintendo ကနေ တရားဝင် သတ်မှတ်ထားတဲ့ Virtual Game Card စနစ်အတိုင်း ငှားရမ်းပေးတာဖြစ်လို့ Ban ခံရမှာ စိတ်ပူစရာမလိုဘဲ ယုံကြည်စိတ်ချစွာ ငှားရမ်းနိုင်ပါတယ်။"
+      }
+    ];
+
+    let state = { games: [], comments: [], posts: [], gameTypes: DEFAULT_GAME_TYPES, guides: [] };
+
+    async function init() {
+      const cached = localStorage.getItem('hyrule_bar_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        state = {
+          ...state,
+          ...parsed,
+          gameTypes: (parsed.gameTypes && parsed.gameTypes.length) ? parsed.gameTypes : DEFAULT_GAME_TYPES
+        };
+        renderAll();
+      } else {
+        renderAll();
+      }
+
+      if (!API_URL || API_URL.includes("PASTE_YOUR")) return;
+
+      try {
+        const res = await fetch(API_URL);
+        const fresh = await res.json();
+        if (fresh && Array.isArray(fresh.games)) {
+          state = {
+            ...state,
+            ...fresh,
+            gameTypes: (fresh.gameTypes && fresh.gameTypes.length) ? fresh.gameTypes : DEFAULT_GAME_TYPES
+          };
+          localStorage.setItem('hyrule_bar_cache', JSON.stringify(state));
+          renderAll();
+        }
+      } catch (err) {
+        console.warn("Using cached data:", err);
+      }
+    }
+
+    function renderAll() {
+      applyFilters();
+      renderGameTypes();
+      renderGuideSteps();
+      renderComments();
+      populateGameDropdown();
+    }
+
+    function switchMainTab(tabName) {
+      ['games', 'types', 'guide'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`navTab-${t}`);
+        if (t === tabName) {
+          view.classList.remove('hidden');
+          btn.className = "py-2 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow";
+        } else {
+          view.classList.add('hidden');
+          btn.className = "py-2 px-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200";
+        }
+      });
+
+      const searchWrap = document.getElementById('headerSearchWrap');
+      if (tabName === 'games') {
+        searchWrap.classList.remove('hidden');
+      } else {
+        searchWrap.classList.add('hidden');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // TAB 2: How Virtual Game Cards Work (Filters out any OL rows if still in Sheet)
+    function renderGameTypes() {
+      const rows = (state.gameTypes && state.gameTypes.length) ? state.gameTypes : DEFAULT_GAME_TYPES;
+
+      const headerRow = rows.find(r => r.section === 'header');
+      if (headerRow && headerRow.title) {
+        document.getElementById('gameTypesHeading').textContent = headerRow.title;
+      }
+
+      const cards = rows.filter(r => r.section === 'card' && String(r.code || '').toUpperCase() !== 'OL');
+      const gridEl = document.getElementById('gameTypesCards');
+      gridEl.className = cards.length > 1
+        ? "grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5"
+        : "grid grid-cols-1 gap-4 sm:gap-5";
+
+      gridEl.innerHTML = cards.map(c => `
+        <div class="bg-white text-slate-900 rounded-2xl p-5 sm:p-6 shadow-xl border border-slate-200 space-y-2.5">
+          <div class="text-2xl sm:text-3xl font-extrabold text-rose-600 tracking-tight">
+            ${escapeHtml(c.code)}
+          </div>
+          <h3 class="text-base sm:text-lg font-extrabold text-slate-900">
+            ${escapeHtml(c.title)}
+          </h3>
+          <div class="text-xs sm:text-sm text-slate-700 mm-text whitespace-pre-line pt-1">
+            ${escapeHtml(c.content)}
+          </div>
+        </div>
+      `).join('');
+
+      const notes = rows.filter(r => r.section === 'note');
+      document.getElementById('gameTypesNotes').innerHTML = notes.map(n => `
+        <div class="flex items-start gap-2.5">
+          <span class="text-rose-400 font-extrabold text-sm mt-0.5 shrink-0">✓</span>
+          <p class="text-xs sm:text-sm text-slate-200 mm-text whitespace-pre-line">${escapeHtml(n.content)}</p>
+        </div>
+      `).join('');
+    }
+
+    // TAB 3: Virtual Game Card Installation Guide Only
+   let activeGuideSubTab = 'install'; // 'install' | 'delete'
+
+    function switchGuideSubTab(subTab) {
+      activeGuideSubTab = subTab;
+      ['install', 'delete'].forEach(t => {
+        const btn = document.getElementById(`guideSubTab-${t}`);
+        if (!btn) return;
+        if (t === subTab) {
+          btn.className = "py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow";
+        } else {
+          btn.className = "py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200";
+        }
+      });
+      renderGuideSteps();
+    }
+
+    // TAB 3: Virtual Game Card Install & Delete Guides
+    function renderGuideSteps() {
+      const container = document.getElementById('guideStepsContainer');
+      const isDeleteTab = activeGuideSubTab === 'delete';
+
+      const steps = (state.guides || []).filter(item => {
+        const t = String(item.type || '').trim().toUpperCase();
+        if (isDeleteTab) {
+          return t === 'DELETE' || t === 'UNLINK' || t === 'EJECT' || t === 'REMOVE';
+        }
+        return !t || t === 'VGC' || t === 'VIRTUAL GAME CARD' || t === 'INSTALL';
+      });
+
+      if (!steps.length) {
+        container.innerHTML = `
+          <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-8 text-center space-y-1.5">
+            <p class="text-sm font-bold text-slate-300">
+              ${isDeleteTab ? 'ပြန်ဖြုတ်နည်း အဆင့်များ မထည့်ရသေးပါ' : 'ချိတ်ဆက်နည်း အဆင့်များ မထည့်ရသေးပါ'}
+            </p>
+            <p class="text-xs text-slate-500">
+              Google Sheet ၏ 'Guides' tab တွင် type ကို '${isDeleteTab ? 'DELETE' : 'VGC'}' ဟုသတ်မှတ်ပြီး ထည့်သွင်းနိုင်ပါသည်
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = steps.map((s, idx) => {
+        const stepLabel = s.step
+          ? (/^step/i.test(s.step) ? s.step : `Step ${s.step}`)
+          : `Step ${idx + 1}`;
+        const safeImgSrc = s.image ? encodeURI(s.image) : '';
+
+        return `
+          <article class="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-lg">
+            <div class="p-4 sm:p-5 space-y-3">
+              <div class="flex items-center gap-2.5">
+                <span class="${isDeleteTab ? 'bg-rose-500 text-white' : 'bg-amber-500 text-slate-950'} text-xs font-extrabold px-3 py-1 rounded-full shrink-0">
+                  ${escapeHtml(stepLabel)}
+                </span>
+                <h3 class="font-extrabold text-base sm:text-lg text-white leading-snug">${escapeHtml(s.title)}</h3>
+              </div>
+
+              ${safeImgSrc ? `
+                <a href="${safeImgSrc}" target="_blank" rel="noopener" class="block group relative rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950">
+                  <img src="${safeImgSrc}" alt="${escapeHtml(stepLabel)}" loading="lazy"
+                    class="w-full h-auto object-contain max-h-[420px] mx-auto group-hover:scale-[1.01] transition" />
+                  <span class="absolute bottom-2 right-2 bg-slate-950/80 text-slate-300 text-[10px] px-2 py-0.5 rounded-md border border-slate-700">
+                    🔍 Tap to zoom
+                  </span>
+                </a>` : ''}
+
+              ${s.content ? `
+                <p class="text-sm text-slate-200 mm-text whitespace-pre-line pt-1">${escapeHtml(s.content)}</p>
+              ` : ''}
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // Single Virtual Game Card Availability Badge
+    function isVgcAvailable(status) {
+      return /^(1|true|yes|ငှားနိုင်သည်)$/i.test(String(status || '').trim());
+    }
+
+    function getAvailabilityBadge(status) {
+      if (status === undefined || status === '') return '';
+      const free = isVgcAvailable(status);
+      const label = free ? 'ငှားနိုင်သည်' : (String(status) === '0' ? 'ငှားထားသည်' : String(status));
+      const style = free
+        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+        : 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+      return `<span class="inline-block text-[10px] font-bold border px-2 py-0.5 rounded-md ${style}">${escapeHtml(label)}</span>`;
+    }
+
+    function renderShelf(list) {
+      const grid = document.getElementById('shelfGrid');
+      document.getElementById('gameCount').textContent = `${list.length} Games`;
+      const desktopCount = document.getElementById('desktopGameCount');
+      if (desktopCount) desktopCount.textContent = `${list.length} Games`;
+
+      grid.innerHTML = list.map((g) => {
+        const realIdx = state.games.indexOf(g);
+        return `
+          <div onclick="openGameModal(${realIdx})"
+            class="group bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden shadow-lg cursor-pointer transition active:scale-[0.98] flex flex-col">
+            <div class="relative game-case w-full bg-slate-800 overflow-hidden shrink-0">
+              <img src="${g.cover}" alt="${g.title}" loading="lazy"
+                class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+              ${g.score ? `
+                <span class="absolute top-2 right-2 bg-slate-950/85 backdrop-blur-xs text-amber-400 border border-amber-500/30 text-[11px] font-bold px-2 py-0.5 rounded-lg shadow">
+                  ★ ${g.score}
+                </span>` : ''}
+            </div>
+            <div class="p-3 flex-1 flex flex-col justify-between">
+              <h2 class="font-bold text-xs sm:text-sm text-slate-100 line-clamp-2 leading-snug">${g.title}</h2>
+              <div class="flex items-center justify-between gap-1.5 mt-2">
+                <p class="text-xs font-bold text-emerald-400 truncate">${g.price || '—'}</p>
+                ${getAvailabilityBadge(g.availability)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showToast(text) {
+      let toast = document.getElementById('hyruleToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'hyruleToast';
+        toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-50 max-w-[90vw] px-4 py-2.5 rounded-xl bg-slate-900/95 border border-amber-500/40 text-amber-200 text-xs font-medium shadow-xl text-center transition-opacity duration-300 pointer-events-none';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = text;
+      toast.style.opacity = '1';
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 3500);
+    }
+
+    function openGameModal(idx) {
+      const g = state.games[idx];
+      if (!g) return;
+
+      const gamePosts = (state.posts || []).filter(
+        p => p.game.toLowerCase() === g.title.trim().toLowerCase()
+      );
+
+      const postsHtml = gamePosts.length
+        ? gamePosts.map((p, i) => `
+            <details ${i === 0 ? 'open' : ''} class="group bg-slate-800/50 border border-slate-700/70 rounded-2xl overflow-hidden">
+              <summary class="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none select-none hover:bg-slate-800/80">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
+                    ${escapeHtml(p.type)}
+                  </span>
+                  <span class="text-sm font-bold text-slate-100 truncate">${escapeHtml(p.title)}</span>
+                </div>
+                <span class="text-slate-400 text-xs transition-transform duration-200 group-open:rotate-180 shrink-0">▼</span>
+              </summary>
+              <div class="px-4 pb-4 pt-2 border-t border-slate-700/50">
+                <p class="text-sm text-slate-200 mm-text whitespace-pre-line">${escapeHtml(p.content)}</p>
+              </div>
+            </details>
+          `).join('')
+        : `
+            <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Hyrule Bar Review</h3>
+              <p class="text-sm text-slate-200 mm-text whitespace-pre-line">${escapeHtml(g.review || 'No review written yet.')}</p>
+            </div>
+          `;
+
+      document.getElementById('gameDrawerBody').innerHTML = `
+        <div class="flex gap-4 items-start">
+          <img src="${g.cover}" alt="${g.title}" class="w-24 sm:w-28 game-case object-cover rounded-xl border border-slate-700 shadow-md shrink-0" />
+          <div class="space-y-1.5">
+            <div class="flex flex-wrap items-center gap-1.5">
+              ${g.platform ? `<span class="text-[11px] font-semibold bg-red-500/15 text-red-300 border border-red-500/30 px-2 py-0.5 rounded-md">${g.platform}</span>` : ''}
+              ${g.releaseYear ? `<span class="text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-md">${g.releaseYear}</span>` : ''}
+              ${g.score ? `<span class="text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md">★ ${g.score}</span>` : ''}
+              ${getAvailabilityBadge(g.availability)}
+            </div>
+            <h2 class="text-base sm:text-lg font-extrabold text-white leading-snug">${g.title}</h2>
+            <p class="text-sm font-bold text-emerald-400">${g.price || ''}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 bg-slate-950/70 border border-slate-800 p-3 rounded-2xl text-center">
+          <div>
+            <span class="block text-[10px] uppercase tracking-wider text-slate-400">Genre</span>
+            <span class="text-xs font-semibold text-slate-200">${g.genre || '—'}</span>
+          </div>
+          <div class="border-x border-slate-800">
+            <span class="block text-[10px] uppercase tracking-wider text-slate-400">Players</span>
+            <span class="text-xs font-semibold text-slate-200">${g.players || '—'}</span>
+          </div>
+          <div>
+            <span class="block text-[10px] uppercase tracking-wider text-slate-400">Size</span>
+            <span class="text-xs font-semibold text-slate-200">${g.fileSize || '—'}</span>
+          </div>
+        </div>
+
+        ${postsHtml}
+      `;
+
+      // Configure Messenger Rent / Inquire button based on availability
+      const rentBtn = document.getElementById('drawerRentBtn');
+      const available = isVgcAvailable(g.availability);
+
+      if (available) {
+        rentBtn.className = 'w-full py-2.5 px-4 rounded-xl bg-[#0084FF] hover:bg-[#0073e6] text-white font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-[0.99] shadow-lg shadow-blue-500/20';
+        rentBtn.innerHTML = '📩 <span>ငှားရန် Messenger မှ ဆက်သွယ်မည်</span>';
+        rentBtn.onclick = async () => {
+          const priceText = g.price ? ` (${g.price})` : '';
+          const msg = `မင်္ဂလာပါ၊ ${g.title}${priceText} (VGC) ငှားချင်လို့ပါ။`;
+          try {
+            await navigator.clipboard.writeText(msg);
+            showToast('ဂိမ်းအမည် Copy ကူးပြီးပါပြီ — Messenger တွင် Paste နှိပ်ပြီး ပို့နိုင်ပါသည်။');
+          } catch (err) {
+            // Clipboard blocked in some in-app browsers; continue opening Messenger
+          }
+          window.open(MESSENGER_URL, '_blank', 'noopener,noreferrer');
+        };
+      } else {
+        rentBtn.className = 'w-full py-2.5 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-semibold text-sm flex items-center justify-center gap-2 transition active:scale-[0.99]';
+        rentBtn.innerHTML = '💬 <span>Messenger မှ စုံစမ်းမည်</span>';
+        rentBtn.onclick = () => {
+          window.open(MESSENGER_URL, '_blank', 'noopener,noreferrer');
+        };
+      }
+
+      document.getElementById('askAboutGameBtn').onclick = () => {
+        hideGameModal();
+        openChat(g.title);
+      };
+
+      const modal = document.getElementById('gameModal');
+      const drawer = document.getElementById('gameDrawer');
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => drawer.classList.remove('drawer-enter'));
+    }
+
+    function hideGameModal() {
+      const modal = document.getElementById('gameModal');
+      const drawer = document.getElementById('gameDrawer');
+      drawer.classList.add('drawer-enter');
+      setTimeout(() => modal.classList.add('hidden'), 180);
+    }
+
+    function closeGameModal(e) {
+      if (e.target.id === 'gameModal') hideGameModal();
+    }
+
+    function populateGameDropdown() {
+      const select = document.getElementById('chatGameTag');
+      select.innerHTML = `<option value="General">General Chat</option>` +
+        state.games.map(g => `<option value="${g.title}">${g.title}</option>`).join('');
+    }
+
+    function renderComments() {
+      const list = document.getElementById('chatList');
+      document.getElementById('chatBadge').textContent = state.comments.length;
+
+      if (!state.comments.length) {
+        list.innerHTML = `<p class="text-center text-xs text-slate-500 py-8">No messages yet. Be the first traveler to leave a note!</p>`;
+        return;
+      }
+
+      list.innerHTML = state.comments.map(c => `
+        <div class="bg-slate-800/70 border border-slate-700/60 rounded-2xl p-3.5 space-y-1">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-bold text-xs text-amber-300">${escapeHtml(c.name)}</span>
+            <span class="text-[10px] text-slate-400">${escapeHtml(c.timestamp)}</span>
+          </div>
+          ${c.game && c.game !== 'General' ? `
+            <span class="inline-block text-[10px] bg-slate-900 text-slate-300 px-2 py-0.5 rounded-md border border-slate-700">
+              🎮 ${escapeHtml(c.game)}
+            </span>` : ''}
+          <p class="text-sm text-slate-100 mm-text break-words">${escapeHtml(c.message)}</p>
+        </div>
+      `).join('');
+    }
+
+    function openChat(preselectGame = 'General') {
+      const select = document.getElementById('chatGameTag');
+      if (preselectGame) select.value = preselectGame;
+      document.getElementById('chatModal').classList.remove('hidden');
+    }
+
+    function hideChatModal() {
+      document.getElementById('chatModal').classList.add('hidden');
+    }
+
+    function closeChatModal(e) {
+      if (e.target.id === 'chatModal') hideChatModal();
+    }
+
+    document.getElementById('chatForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const COOLDOWN_MS = 30 * 1000;
+      const lastPost = Number(localStorage.getItem('hyrule_last_post') || 0);
+      const remaining = Math.ceil((COOLDOWN_MS - (Date.now() - lastPost)) / 1000);
+      if (remaining > 0) {
+        alert(`Please wait ${remaining}s before sending another message.`);
+        return;
+      }
+      localStorage.setItem('hyrule_last_post', Date.now().toString());
+
+      const name = document.getElementById('chatName').value.trim();
+      const game = document.getElementById('chatGameTag').value;
+      const message = document.getElementById('chatMessage').value.trim();
+      if (!message) return;
+
+      const btn = document.getElementById('chatSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      state.comments.unshift({
+        timestamp: 'Just now',
+        name,
+        game,
+        message
+      });
+      renderComments();
+      document.getElementById('chatMessage').value = '';
+
+      if (API_URL && !API_URL.includes("PASTE_YOUR")) {
+        try {
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ name, game, message })
+          });
+        } catch (err) {
+          console.error("Failed to post comment:", err);
+        }
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Send';
+    });
+
+    let showAvailableOnly = false;
+
+    function toggleAvailableFilter() {
+      showAvailableOnly = !showAvailableOnly;
+      const btn = document.getElementById('availFilterBtn');
+      const dot = document.getElementById('availDot');
+
+      if (showAvailableOnly) {
+        btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm shadow-emerald-500/10";
+        dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+      } else {
+        btn.className = "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition bg-slate-900 text-slate-300 border-slate-700 hover:border-emerald-500/50";
+        dot.className = "w-2 h-2 rounded-full bg-slate-500";
+      }
+      applyFilters();
+    }
+
+    function parseNumber(val) {
+      if (val === undefined || val === null || val === '') return null;
+      const clean = String(val).split('/')[0].replace(/[^0-9.]/g, '');
+      const num = parseFloat(clean);
+      return isNaN(num) ? null : num;
+    }
+
+    function applyFilters() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const sortBy = document.getElementById('sortSelect').value;
+
+      const filtered = state.games.filter(g => {
+        const matchesSearch = g.title.toLowerCase().includes(q) ||
+          (g.genre && g.genre.toLowerCase().includes(q));
+        const matchesAvail = !showAvailableOnly || isVgcAvailable(g.availability);
+        return matchesSearch && matchesAvail;
+      });
+
+      if (sortBy !== 'default') {
+        filtered.sort((a, b) => {
+          if (sortBy === 'title-asc') return a.title.localeCompare(b.title);
+          if (sortBy === 'score-desc') return (parseNumber(b.score) ?? -1) - (parseNumber(a.score) ?? -1);
+          if (sortBy === 'year-desc') return (parseNumber(b.releaseYear) ?? 0) - (parseNumber(a.releaseYear) ?? 0);
+          if (sortBy === 'price-asc') return (parseNumber(a.price) ?? Infinity) - (parseNumber(b.price) ?? Infinity);
+          if (sortBy === 'price-desc') return (parseNumber(b.price) ?? -1) - (parseNumber(a.price) ?? -1);
+          return 0;
+        });
+      }
+
+      renderShelf(filtered);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    init();
+
+    init();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn('SW registration failed:', err);
+        });
+      });
+    }
+
+  </script>
+</body>
+</html>
