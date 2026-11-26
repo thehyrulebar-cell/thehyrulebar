@@ -56,6 +56,12 @@
           <span id="gameCount" class="sm:hidden text-xs bg-slate-800 text-amber-300 px-2.5 py-1 rounded-full font-semibold">
             Loading...
           </span>
+          <button id="refreshBtn" onclick="manualRefresh()" title="Refresh Games" aria-label="Refresh"
+            class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-amber-400 transition active:scale-95">
+            <svg id="refreshIcon" class="w-4 h-4 transition-transform duration-500" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
           <a href="https://www.facebook.com/thehyrulebar" target="_blank" rel="noopener noreferrer"
             class="sm:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2]/25 border border-[#1877F2]/35 text-[#60a5fa] text-xs font-semibold transition active:scale-95">
             <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -291,6 +297,43 @@
     ];
 
     let state = { games: [], comments: [], posts: [], gameTypes: DEFAULT_GAME_TYPES, guides: [] };
+    let isFetching = false;
+
+    async function fetchFreshData(isManual = false) {
+      if (isFetching || !API_URL || API_URL.includes("PASTE_YOUR")) return;
+      isFetching = true;
+
+      const btn = document.getElementById('refreshBtn');
+      const icon = document.getElementById('refreshIcon');
+      if (btn) btn.disabled = true;
+      if (icon) icon.classList.add('animate-spin');
+
+      try {
+        const res = await fetch(API_URL, { cache: 'no-store' });
+        const fresh = await res.json();
+        if (fresh && Array.isArray(fresh.games)) {
+          state = {
+            ...state,
+            ...fresh,
+            gameTypes: (fresh.gameTypes && fresh.gameTypes.length) ? fresh.gameTypes : DEFAULT_GAME_TYPES
+          };
+          localStorage.setItem('hyrule_bar_cache', JSON.stringify(state));
+          renderAll();
+          if (isManual) showToast('✅ Refresh လုပ်ပြီးပါပြီ');
+        }
+      } catch (err) {
+        console.warn("Using cached data:", err);
+        if (isManual) showToast('⚠️ အင်တာနက်လိုင်း စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါ');
+      } finally {
+        isFetching = false;
+        if (btn) btn.disabled = false;
+        if (icon) icon.classList.remove('animate-spin');
+      }
+    }
+
+    function manualRefresh() {
+      fetchFreshData(true);
+    }
 
     async function init() {
       const cached = localStorage.getItem('hyrule_bar_cache');
@@ -301,28 +344,9 @@
           ...parsed,
           gameTypes: (parsed.gameTypes && parsed.gameTypes.length) ? parsed.gameTypes : DEFAULT_GAME_TYPES
         };
-        renderAll();
-      } else {
-        renderAll();
       }
-
-      if (!API_URL || API_URL.includes("PASTE_YOUR")) return;
-
-      try {
-        const res = await fetch(API_URL);
-        const fresh = await res.json();
-        if (fresh && Array.isArray(fresh.games)) {
-          state = {
-            ...state,
-            ...fresh,
-            gameTypes: (fresh.gameTypes && fresh.gameTypes.length) ? fresh.gameTypes : DEFAULT_GAME_TYPES
-          };
-          localStorage.setItem('hyrule_bar_cache', JSON.stringify(state));
-          renderAll();
-        }
-      } catch (err) {
-        console.warn("Using cached data:", err);
-      }
+      renderAll();
+      await fetchFreshData(false);
     }
 
     function renderAll() {
@@ -394,7 +418,7 @@
     }
 
     // TAB 3: Virtual Game Card Installation Guide Only
-   let activeGuideSubTab = 'install'; // 'install' | 'delete'
+    let activeGuideSubTab = 'install'; // 'install' | 'delete'
 
     function switchGuideSubTab(subTab) {
       activeGuideSubTab = subTab;
@@ -792,7 +816,12 @@
         .replace(/"/g, '&quot;');
     }
 
-    init();
+    // Silently refresh when the user reopens the PWA from the background
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        fetchFreshData(false);
+      }
+    });
 
     init();
 
@@ -803,7 +832,6 @@
         });
       });
     }
-
   </script>
 </body>
 </html>
