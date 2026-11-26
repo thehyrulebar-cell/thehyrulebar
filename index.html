@@ -576,7 +576,7 @@
                 <span class="text-slate-400 text-xs transition-transform duration-200 group-open:rotate-180 shrink-0">▼</span>
               </summary>
               <div class="px-4 pb-4 pt-2 border-t border-slate-700/50">
-                <p class="text-sm text-slate-200 mm-text whitespace-pre-line">${escapeHtml(p.content)}</p>
+                <p class="text-sm text-slate-200 mm-text whitespace-pre-line">${linkifyText(p.content)}</p>
               </div>
             </details>
           `).join('')
@@ -696,6 +696,14 @@
           <p class="text-sm text-slate-100 mm-text break-words">${escapeHtml(c.message)}</p>
         </div>
       `).join('');
+    }
+
+    function linkifyText(str) {
+      const escaped = escapeHtml(str);
+      return escaped.replace(
+        /(https?:\/\/[^\s<]+)/g,
+        '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-amber-400 underline hover:text-amber-300 break-all">$1</a>'
+      );
     }
 
     function openChat(preselectGame = 'General') {
