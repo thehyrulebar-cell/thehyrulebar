@@ -171,15 +171,19 @@
       <p class="text-xs sm:text-sm text-slate-400 mm-text">ဂိမ်းစတင်ချိတ်ဆက်နည်းနှင့် ငှားရမ်းမှုပြီးဆုံးချိန် ပြန်လည်ဖြုတ်သိမ်းနည်း အဆင့်ဆင့်</p>
     </div>
 
-    <!-- Sub-Tab Toggle: Install vs Delete/Eject -->
-    <div class="grid grid-cols-2 gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800 max-w-md">
+    <!-- Sub-Tab Toggle: Install vs Delete/Eject vs Phone App -->
+    <div class="grid grid-cols-3 gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
       <button id="guideSubTab-install" type="button" onclick="switchGuideSubTab('install')"
-        class="py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow">
-        <span>📥</span><span>ငှားထားသော User ထည့်သွင်းနည်းနှင့် Virtual Game Card ထည့်သွင်းနည်း</span>
+        class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow">
+        <span>📥</span><span>VGC ထည့်နည်း</span>
       </button>
       <button id="guideSubTab-delete" type="button" onclick="switchGuideSubTab('delete')"
-        class="py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200">
-        <span>🗑️</span><span>ငှားထားသော User ပြန်ဖြုတ်နည်း</span>
+        class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200">
+        <span>🗑️</span><span>User ပြန်ဖြုတ်နည်း</span>
+      </button>
+      <button id="guideSubTab-app" type="button" onclick="switchGuideSubTab('app')"
+        class="py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200">
+        <span>📱</span><span>App သွင်းနည်း</span>
       </button>
     </div>
 
@@ -418,34 +422,56 @@
     }
 
     // TAB 3: Virtual Game Card Installation Guide Only
-    let activeGuideSubTab = 'install'; // 'install' | 'delete'
+  let activeGuideSubTab = 'install'; // 'install' | 'delete' | 'app'
 
     function switchGuideSubTab(subTab) {
       activeGuideSubTab = subTab;
-      ['install', 'delete'].forEach(t => {
+      ['install', 'delete', 'app'].forEach(t => {
         const btn = document.getElementById(`guideSubTab-${t}`);
         if (!btn) return;
         if (t === subTab) {
-          btn.className = "py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow";
+          btn.className = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-amber-500 text-slate-950 shadow";
         } else {
-          btn.className = "py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200";
+          btn.className = "py-2 px-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200";
         }
       });
       renderGuideSteps();
     }
 
-    // TAB 3: Virtual Game Card Install & Delete Guides
+    const DEFAULT_APP_GUIDES = [
+      {
+        type: 'APP',
+        step: 'Android',
+        title: 'Android ဖုန်းတွင် App အဖြစ် ထည့်သွင်းနည်း (Chrome)',
+        content: '1. Google Chrome Browser ဖြင့် https://thehyrulebar-cell.github.io/the-hyrule-bar/ ကို ဖွင့်ပါ။\n2. ညာဘက်အပေါ်ထောင့်ရှိ အစက် ၃ စက် (⋮) ကို နှိပ်ပါ။\n3. "Install app" သို့မဟုတ် "Add to Home screen" ကို နှိပ်ပါ။\n4. "Install" ကို အတည်ပြုလိုက်ပါက Home Screen ပေါ်တွင် The Hyrule Bar App Icon ရောက်ရှိလာပါမည်။'
+      },
+      {
+        type: 'APP',
+        step: 'iPhone / iPad',
+        title: 'iPhone / iPad တွင် App အဖြစ် ထည့်သွင်းနည်း (Safari)',
+        content: '1. Safari Browser ဖြင့် https://thehyrulebar-cell.github.io/the-hyrule-bar/ ကို ဖွင့်ပါ။ (Facebook အတွင်းမှ တိုက်ရိုက်မရပါ — ညာဘက်အောက်ခြေရှိ Safari ပုံလေးကို နှိပ်ပြီး အရင်ဖွင့်ပါ)\n2. အောက်ခြေအလယ်ရှိ Share ခလုတ် (⬆️ လေးထောင့်အပေါ်မြှားပုံ) ကို နှိပ်ပါ။\n3. အောက်သို့ဆွဲချပြီး "Add to Home Screen" ကို နှိပ်ပါ။\n4. ညာဘက်အပေါ်ထောင့်ရှိ "Add" ကို နှိပ်လိုက်ပါက Home Screen ပေါ်တွင် App အဖြစ် အသုံးပြုနိုင်ပါပြီ။'
+      }
+    ];
+
     function renderGuideSteps() {
       const container = document.getElementById('guideStepsContainer');
       const isDeleteTab = activeGuideSubTab === 'delete';
+      const isAppTab = activeGuideSubTab === 'app';
 
-      const steps = (state.guides || []).filter(item => {
+      let steps = (state.guides || []).filter(item => {
         const t = String(item.type || '').trim().toUpperCase();
+        if (isAppTab) {
+          return t === 'APP' || t === 'PWA' || t === 'MOBILE';
+        }
         if (isDeleteTab) {
           return t === 'DELETE' || t === 'UNLINK' || t === 'EJECT' || t === 'REMOVE';
         }
         return !t || t === 'VGC' || t === 'VIRTUAL GAME CARD' || t === 'INSTALL';
       });
+
+      if (isAppTab && !steps.length) {
+        steps = DEFAULT_APP_GUIDES;
+      }
 
       if (!steps.length) {
         container.innerHTML = `
@@ -463,15 +489,18 @@
 
       container.innerHTML = steps.map((s, idx) => {
         const stepLabel = s.step
-          ? (/^step/i.test(s.step) ? s.step : `Step ${s.step}`)
+          ? (/^(step|android|iphone)/i.test(s.step) ? s.step : `Step ${s.step}`)
           : `Step ${idx + 1}`;
         const safeImgSrc = s.image ? encodeURI(s.image) : '';
+        const badgeColor = isDeleteTab
+          ? 'bg-rose-500 text-white'
+          : (isAppTab ? 'bg-emerald-500 text-slate-950' : 'bg-amber-500 text-slate-950');
 
         return `
           <article class="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-lg">
             <div class="p-4 sm:p-5 space-y-3">
               <div class="flex items-center gap-2.5">
-                <span class="${isDeleteTab ? 'bg-rose-500 text-white' : 'bg-amber-500 text-slate-950'} text-xs font-extrabold px-3 py-1 rounded-full shrink-0">
+                <span class="${badgeColor} text-xs font-extrabold px-3 py-1 rounded-full shrink-0">
                   ${escapeHtml(stepLabel)}
                 </span>
                 <h3 class="font-extrabold text-base sm:text-lg text-white leading-snug">${escapeHtml(s.title)}</h3>
